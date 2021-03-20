@@ -1,0 +1,69 @@
+model:
+    kind: VMA
+    autoencoder: VMA
+    likelihood: bernoulli
+    # vae latent size
+    latent_dim: 64
+    # size of matching space (of attention keys)
+    matching_dim: 200
+    # number of importance samples
+    importance_num: 4
+train_data:
+    kind: omniglot
+    root: ./data
+    batch_size: 256
+    timesteps: 32
+    exact: true
+    max_img_per_class: 4
+    iter: 1000
+    resize: 26
+val_data:
+    kind: omniglot
+    root: ./data
+    batch_size: 32
+    timesteps: 19
+    exact: true
+    max_img_per_class: 19
+    resize: 26
+test_data:
+    kind: omniglot
+    root: ./data
+    batch_size: 16
+    timesteps: 1
+    exact: false
+    max_batch_cls: 1
+    resize: 26
+train_spec:
+    checkpoint_path: saved_models/vma_omniglot.pt
+    log_file: logs/vma_omniglot.log
+    gpus:
+        - 0
+        - 1
+    n_jobs: 30
+    steps: 1e5
+    optimizer: Adam
+    full_loss: false
+    lr: 1e-4
+    scheduler:
+        kind: StepLR
+        step_size: 100000
+        gamma: 0.1
+        times: 1
+test_spec:
+    metric: ELBO
+    checkpoint_path: saved_models/vma_omniglot.pt
+    output_file: results.csv
+    n_jobs: 20
+    gpus:
+        - 0
+        - 1
+    test_params:
+        max_batch_cls:
+            - 1
+            - 2
+        timesteps:
+            - 1..5
+            - 10
+            - 19
+    importance_num: 1000
+
